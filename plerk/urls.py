@@ -15,11 +15,22 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework.schemas import get_schema_view
+
 
 api_pattern = path('api/', include('api.router'))
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 
+    path(
+        'openapi/',
+        get_schema_view(
+            title="Plerk API",
+            description="A simple Transactions Summary API",
+            version="0.1.0",
+            patterns=[api_pattern]
+        ), name='openapi-schema'
+    ),
     api_pattern,
 ]

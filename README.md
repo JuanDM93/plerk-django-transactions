@@ -6,6 +6,14 @@ Django demo project
 
 This is an api demo built on django's [rest](https://www.django-rest-framework.org/) framework.
 
+It consists on a simple api that evaluates a transactions from a db and generates reports.
+
+### Database
+
+This django project uses a postgres database by default, so you need to create a database first and modify .env, as well as [settings.py](https://docs.djangoproject.com/en/4.0/ref/databases/), as needed.
+
+This project is built based on a db.csv file, which contains the transactions, and wich is modified through the /utils/import_csv.py script in order to upload its contents into the project database.
+
 ### Service Endpoints
 
 ```endpoints
@@ -13,15 +21,16 @@ This is an api demo built on django's [rest](https://www.django-rest-framework.o
 
 /api/summary
 /api/companies/{company_id}
+
+/openapi
 ```
 
 ## Run options
 
+It is already deployed on heroku, however, it is not accessible withouth valid credentials.
+URL = `https://pydj-m1ch-plerk.herokuapp.com`
+
 ### Local python virtual environment
-
-#### Database
-
-This django project uses a postgres database by default, so you need to create a database first and modify .env, as well as [settings.py](https://docs.djangoproject.com/en/4.0/ref/databases/), as needed.
 
 #### Setup
 
@@ -46,6 +55,16 @@ Run server (where manage.py is)
 ```bash
 python manage.py runserver <PORT>
 ```
+
+### Heroku
+
+This service is available on [Heroku](https://www.heroku.com/), so you can deploy it there.
+
+To deploy, run `heroku create`
+
+Veify that the environment variables are set correctly
+
+Then, run `git push heroku master`
 
 ## License
 
