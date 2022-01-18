@@ -10,6 +10,9 @@ This is an api demo built on django's [rest](https://www.django-rest-framework.o
 
 ```endpoints
 /admin
+
+/api/summary
+/api/companies/{company_id}
 ```
 
 ## Run options
