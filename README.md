@@ -6,7 +6,7 @@ Django demo project
 
 This is an api demo built on django's [rest](https://www.django-rest-framework.org/) framework.
 
-It consists on a simple api that evaluates a transactions from a db and generates reports.
+It consists on a simple api that evaluates transactions from a db and generates reports.
 
 ### Database
 
@@ -28,6 +28,7 @@ This project is built based on a db.csv file, which contains the transactions, a
 ## Run options
 
 It is already deployed on heroku, however, it is not accessible withouth valid credentials.
+
 URL = `https://pydj-m1ch-plerk.herokuapp.com`
 
 ### Local python virtual environment
