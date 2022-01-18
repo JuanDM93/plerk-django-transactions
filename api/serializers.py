@@ -9,11 +9,15 @@ class CompanySerializer(serializers.ModelSerializer):
 
 
 class TransactionSerializer(serializers.ModelSerializer):
-    company = CompanySerializer()
+    company_id = CompanySerializer()
 
     class Meta:
         model = Transaction
-        fields = ('id', 'company', 'price', 'status_transaction', 'date')
+        fields = (
+            'id', 'company_id', 'price',
+            'status_transaction', 'date',
+            'status_approved', 'final_payment'
+        )
 
 
 class SummarySerializer(serializers.Serializer):
