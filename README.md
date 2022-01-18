@@ -39,7 +39,7 @@ python -m pip install -U pip setuptools
 pip install -r requirements.txt
 ```
 
-Now, create an [.env](https://django-environ.readthedocs.io/en/latest/) file, as in .env.example file inside plerk/ dir
+Now, create an [.env](https://django-environ.readthedocs.io/en/latest/) file, as in .env.example file, and run `python manage.py makemigrations` and `python manage.py migrate`
 
 Run server (where manage.py is)
 
