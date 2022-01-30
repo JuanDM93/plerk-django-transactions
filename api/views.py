@@ -17,28 +17,42 @@ class SummaryView(APIView):
             - total revenue
             - total canceled revenue
             - most canceled company
+
+        - final_payment (boolean)):
+            - Este punto es una combinación de "Estatus de transacción y estatus de aprobación"
+            - Sólo se deben cobrar aquellas combinaciones que sean:
+                - status_transaction = closed
+                - status_approved = true
         """
         try:
-            confirmed = Transaction.objects.filter(final_payment=True)
+            transactions = Transaction.objects.annotate(
+                total_revenue=Sum('price'),
+                cancels=Count('id'),
+            )
+
+            confirmed = transactions.filter(
+                status_transaction='closed', status_approved=True)
             total_revenue = confirmed.aggregate(Sum('price'))['price__sum']
 
-            canceled = Transaction.objects.filter(final_payment=False)
+            canceled = transactions.exclude(
+                status_transaction='closed', status_approved=True)
             total_canceled = canceled.aggregate(Sum('price'))['price__sum']
 
-            most_selling_company = confirmed.values('company_id').annotate(
-                total_revenue=Sum('price')).order_by('-total_revenue')[0]
+            most_selling_company = confirmed.values(
+                'company_id').order_by('-total_revenue')[0]
             most_selling_company = Company.objects.get(
                 id=most_selling_company['company_id'])
 
-            least_selling_company = confirmed.values('company_id').annotate(
-                total_revenue=Sum('price')).order_by('total_revenue')[0]
+            least_selling_company = confirmed.values(
+                'company_id').order_by('total_revenue')[0]
             least_selling_company = Company.objects.get(
                 id=least_selling_company['company_id'])
 
-            most_canceled_company = canceled.values('company_id').annotate(
-                cancels=Count('id')).order_by('-cancels')[0]
+            most_canceled_company = canceled.values(
+                'company_id').order_by('-cancels')[0]
             most_canceled_company = Company.objects.get(
                 id=most_canceled_company['company_id'])
+
         except Exception as e:
             return Response(
                 {'error': str(e)},
@@ -69,24 +83,29 @@ class CompanyView(APIView):
             - most transactions date
         """
         try:
-            transactions = Transaction.objects.filter(company_id=pk)
-            effective_transactions = transactions.filter(final_payment=True)
-            canceled_transactions = transactions.filter(final_payment=False)
+            transactions = Transaction.objects.filter(company_id=pk).annotate(
+                dcount=Count('date'),
+            )
+
+            effective_transactions = transactions.filter(
+                status_transaction='closed', status_approved=True
+            )
+            canceled_transactions = transactions.exclude(
+                status_transaction='closed', status_approved=True
+            )
 
             total_effective_revenue = effective_transactions.aggregate(
                 Sum('price'))['price__sum']
             total_canceled_revenue = canceled_transactions.aggregate(
                 Sum('price'))['price__sum']
 
-            most_transaction_date = transactions.annotate(
-                dcount=Count('date')).order_by('-dcount')[0].date
-
             company_summary = {
                 'name': Company.objects.get(id=pk).name,
                 'total_effective_revenue': 0 if total_effective_revenue is None else total_effective_revenue,
                 'total_canceled_revenue': 0 if total_canceled_revenue is None else total_canceled_revenue,
-                'most_transaction_date': most_transaction_date,
+                'most_transaction_date': transactions.order_by('-dcount')[0].date,
             }
+
         except Company.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 

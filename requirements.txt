@@ -1,6 +1,7 @@
 django
 psycopg2
 django-environ
+pandas
 djangorestframework
 django-heroku
 gunicorn

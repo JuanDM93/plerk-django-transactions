@@ -51,11 +51,6 @@ class Transaction(models.Model):
     - Estatus de aprobación
         - false —> no se hizo un cobro
         - true —>  el cobro si fue aplicado a la tarjeta
-    - Cobro Final  (Boolean)
-        - Este punto es una combinación de "Estatus de transacción y estatus de aprobación"
-            - Sólo se deben cobrar aquellas combinaciones que sean:
-                - status_transaction = closed
-                - status_approved = true
     """
     company_id = models.ForeignKey(Company, on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -66,7 +61,6 @@ class Transaction(models.Model):
         max_length=12
     )
     status_approved = models.BooleanField()
-    final_payment = models.BooleanField()
 
     def __str__(self):
         return f'{self.company_id} - {self.price} - {self.date} - {self.status_transaction}'

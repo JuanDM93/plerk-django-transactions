@@ -38,12 +38,10 @@ class ModelTests(TestCase):
             price=100,
             status_transaction='confirmed',
             status_approved=True,
-            final_payment=True
         )
         self.assertEqual(transaction.company_id, company)
         self.assertEqual(transaction.date, now)
         self.assertEqual(transaction.price, 100)
-        self.assertEqual(transaction.final_payment, True)
 
 
 class SerializerTest(TestCase):
@@ -71,10 +69,8 @@ class SerializerTest(TestCase):
             price=100,
             status_transaction='confirmed',
             status_approved=True,
-            final_payment=True
         )
         serializer = TransactionSerializer(transaction)
-        self.assertEqual(serializer.data['final_payment'], True)
         self.assertEqual(serializer.data['company_id']['id'], company.id)
 
 
@@ -83,7 +79,7 @@ class SummaryTest(TestCase):
         return super().setUp()
 
     def test_summary_serializer(self):
-        now = datetime.now(tz=UTC)
+        #now = datetime.now(tz=UTC)
         company = Company.objects.create(
             name='Test Company',
             status='active',

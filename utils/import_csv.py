@@ -18,15 +18,6 @@ def clean_csv(database: str = 'test_database.csv'):
     # Validate
     df['status_approved'] = df['status_approved'].astype(bool)
 
-    # Get final payment
-    df['final_payment'] = [
-        True if (
-            status_transaction == 'closed' and status_approved == True)
-        else False for status_transaction, status_approved in zip(
-            df['status_transaction'],
-            df['status_approved'])
-    ]
-
     # create companies csv
     df['company'] = df['company'].str.casefold()
     companies_dict = {
@@ -48,6 +39,9 @@ def clean_csv(database: str = 'test_database.csv'):
     df['id'] = [i for i in range(1, len(df) + 1)]
     df.drop(columns=['company'], inplace=True)
 
+    # Cents to dollars
+    df['price'] = df['price'] / 100
+
     # Order columns
     df = df[
         [
@@ -56,7 +50,6 @@ def clean_csv(database: str = 'test_database.csv'):
             'date',
             'status_transaction',
             'status_approved',
-            'final_payment',
             'company_id',
         ]
     ]

@@ -16,7 +16,7 @@ class TransactionSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'company_id', 'price',
             'status_transaction', 'date',
-            'status_approved', 'final_payment'
+            'status_approved',
         )
 
 
