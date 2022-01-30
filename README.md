@@ -10,9 +10,13 @@ It consists on a simple api that evaluates transactions from a db and generates 
 
 ### Database
 
-This django project uses a postgres database by default, so you need to create a database first and modify .env, as well as [settings.py](https://docs.djangoproject.com/en/4.0/ref/databases/), as needed.
+This django project uses a postgres database by default. Create a database first and modify .env as needed, as well as [settings.py](https://docs.djangoproject.com/en/4.0/ref/databases/).
 
-This project is built based on a db.csv file, which contains the transactions, and wich is modified through the /utils/import_csv.py script in order to upload its contents into the project database.
+This project is built based on a `test_database.csv` file, which contains the transactions to be imported as follows:
+
+```bash
+python manage.py import_csv docs/test_database.csv
+```
 
 ### Service Endpoints
 
