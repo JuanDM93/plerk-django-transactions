@@ -20,18 +20,25 @@ class Command(BaseCommand):
         with open(csv_path, 'r') as csv_file:
             csv_reader = csv.reader(csv_file, delimiter=',')
             next(csv_reader)
+            t_size = 0
+            c_size = 0
             for row in csv_reader:
                 try:
                     company_name = row[0].casefold()
                     company = Company.objects.get(name=company_name)
                 except Company.DoesNotExist:
                     company = Company.objects.create(name=company_name)
+                    c_size += 1
+
                 Transaction.objects.create(
                     price=float(row[1]) / 100,
                     date=row[2],
-                    status_transaction=row[3],
-                    status_approved=bool(row[4].capitalize()),
+                    status_transaction=row[3].casefold(),
+                    status_approved=row[4].casefold() == 'true',
                     company_id=company,
                 )
-        self.stdout.write(self.style.SUCCESS(
-            'Successfully imported transactions and companies from CSV file'))
+                t_size += 1
+        self.stdout.write(
+            self.style.SUCCESS(
+                f'Successfully imported {t_size} transactions and {c_size} companies from CSV file')
+        )
