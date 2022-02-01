@@ -1,8 +1,9 @@
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.db.models import Count, Sum
 
+from django.db.models import Sum, Count
+from django.db.models.functions import TruncDate
 
 from .models import Transaction, Company
 from .serializers import SummarySerializer, CompanySummarySerializer, CompanySerializer
@@ -17,60 +18,57 @@ class SummaryView(APIView):
             - total revenue
             - total canceled revenue
             - most canceled company
-
-        - final_payment (boolean)):
-            - Este punto es una combinación de "Estatus de transacción y estatus de aprobación"
-            - Sólo se deben cobrar aquellas combinaciones que sean:
-                - status_transaction = closed
-                - status_approved = true
         """
         try:
-            transactions = Transaction.objects.annotate(
-                total_revenue=Sum('price'),
-                cancels=Count('id'),
+            transactions = Transaction.objects.all()
+
+            confirmed_transactions = transactions.filter(
+                status_transaction='closed',
+                status_approved=True
             )
+            total_effective_revenue = confirmed_transactions.aggregate(
+                Sum('price')
+            )['price__sum']
 
-            confirmed = transactions.filter(
-                status_transaction='closed', status_approved=True)
-            total_revenue = confirmed.aggregate(Sum('price'))['price__sum']
+            canceled_transactions = transactions.exclude(
+                status_transaction='closed',
+                status_approved=True
+            )
+            total_canceled_revenue = canceled_transactions.aggregate(
+                Sum('price')
+            )['price__sum']
 
-            canceled = transactions.exclude(
-                status_transaction='closed', status_approved=True)
-            total_canceled = canceled.aggregate(Sum('price'))['price__sum']
+            sells = confirmed_transactions.values('company_id').annotate(
+                t_revenue=Sum('price'))
 
-            most_selling_company = confirmed.values(
-                'company_id').order_by('-total_revenue')[0]
+            most_selling_company = sells.order_by('-t_revenue')[0]
             most_selling_company = Company.objects.get(
-                id=most_selling_company['company_id'])
+                pk=most_selling_company['company_id'])
 
-            least_selling_company = confirmed.values(
-                'company_id').order_by('total_revenue')[0]
+            least_selling_company = sells.order_by('t_revenue')[0]
             least_selling_company = Company.objects.get(
-                id=least_selling_company['company_id'])
+                pk=least_selling_company['company_id'])
 
-            most_canceled_company = canceled.values(
-                'company_id').order_by('-cancels')[0]
+            most_canceled_company = canceled_transactions.values('company_id').annotate(
+                total_canceled=Count('company_id')).order_by('-total_canceled')[0]
             most_canceled_company = Company.objects.get(
-                id=most_canceled_company['company_id'])
+                pk=most_canceled_company['company_id'])
+
+            summary = SummarySerializer(
+                data={
+                    'most_selling_company': CompanySerializer(most_selling_company).data,
+                    'least_selling_company': CompanySerializer(least_selling_company).data,
+                    'total_effective_revenue': total_effective_revenue,
+                    'total_canceled_revenue': total_canceled_revenue,
+                    'most_canceled_company': CompanySerializer(most_canceled_company).data,
+                }
+            )
+            if summary.is_valid():
+                return Response(summary.data, status=status.HTTP_200_OK)
+            return Response(summary.errors, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
-            return Response(
-                {'error': str(e)},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        summary = SummarySerializer(
-            data={
-                'most_selling_company': CompanySerializer(most_selling_company).data,
-                'least_selling_company': CompanySerializer(least_selling_company).data,
-                'total_effective_revenue': total_revenue,
-                'total_canceled_revenue': total_canceled,
-                'most_canceled_company': CompanySerializer(most_canceled_company).data
-            }
-        )
-        if summary.is_valid():
-            return Response(summary.data, status=status.HTTP_200_OK)
-        return Response(summary.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(e, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class CompanyView(APIView):
@@ -78,39 +76,38 @@ class CompanyView(APIView):
         """
         Return a summary report of transactions for a specific company
             - name
-            - total effective revenue
-            - total canceled revenue
-            - most transactions date
+            - total effective transactions
+            - total canceled transactions
+            - date with most transactions
         """
         try:
-            transactions = Transaction.objects.filter(company_id=pk).annotate(
-                dcount=Count('date'),
+            transactions = Transaction.objects.filter(
+                company_id=pk
             )
-
-            effective_transactions = transactions.filter(
-                status_transaction='closed', status_approved=True
-            )
-            canceled_transactions = transactions.exclude(
-                status_transaction='closed', status_approved=True
-            )
-
-            total_effective_revenue = effective_transactions.aggregate(
-                Sum('price'))['price__sum']
-            total_canceled_revenue = canceled_transactions.aggregate(
-                Sum('price'))['price__sum']
-
-            company_summary = {
-                'name': Company.objects.get(id=pk).name,
-                'total_effective_revenue': 0 if total_effective_revenue is None else total_effective_revenue,
-                'total_canceled_revenue': 0 if total_canceled_revenue is None else total_canceled_revenue,
-                'most_transaction_date': transactions.order_by('-dcount')[0].date,
-            }
-
         except Company.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
+        effective_transactions = transactions.filter(
+            status_transaction='closed',
+            status_approved=True,
+        )
+        canceled_transactions = transactions.exclude(
+            status_transaction='closed',
+            status_approved=True,
+        )
+
+        most_transaction_date = transactions.values('date').annotate(
+            r_date=TruncDate('date')).values('r_date').annotate(
+            c_date=Count('r_date')
+        ).order_by('-c_date')[0].get('r_date')
+
+        company_summary = {
+            'name': Company.objects.get(pk=pk).name.title(),
+            'total_effective_transactions': effective_transactions.count(),
+            'total_canceled_transactions': canceled_transactions.count(),
+            'most_transactions_date': most_transaction_date,
+        }
         serializer = CompanySummarySerializer(data=company_summary)
         if serializer.is_valid():
             return Response(serializer.data, status=status.HTTP_200_OK)
-
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

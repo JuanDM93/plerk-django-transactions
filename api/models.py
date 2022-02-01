@@ -1,27 +1,16 @@
 from django.db import models
 
 
-COMPANY_STATUS_CHOICES = (
-    ("active", "Active"),
-    ("inactive", "Inactive"),
-)
-
-TRANSACTION_STATUS_CHOICES = (
-    ("closed", "Closed"),
-    ("reversed", "Reversed"),
-    ("pending", "Pending"),
-
-    ("funding", "Funding"),
-    ("funding-user", "Funding User"),
-)
-
-
 class Company(models.Model):
     """
     - ID (en el formato que se considere más seguro)
     - Nombre
     - Status (activa/inactiva)
     """
+    COMPANY_STATUS_CHOICES = (
+        ("active", "Active"),
+        ("inactive", "Inactive"),
+    )
     name = models.CharField(max_length=100)
     status = models.CharField(
         choices=COMPANY_STATUS_CHOICES,
@@ -30,7 +19,7 @@ class Company(models.Model):
     )
 
     def __str__(self):
-        return self.name.title()
+        return f"{self.name.title()} - {self.get_status_display()}"
 
     class Meta:
         verbose_name = "Company"
@@ -51,7 +40,20 @@ class Transaction(models.Model):
     - Estatus de aprobación
         - false —> no se hizo un cobro
         - true —>  el cobro si fue aplicado a la tarjeta
+    - Cobro Final (Boolean)):
+            - Este punto es una combinación de "Estatus de transacción y estatus de aprobación"
+            - Sólo se deben cobrar aquellas combinaciones que sean:
+                - status_transaction = closed
+                - status_approved = true
     """
+    TRANSACTION_STATUS_CHOICES = (
+        ("closed", "Closed"),
+        ("reversed", "Reversed"),
+        ("pending", "Pending"),
+
+        ("funding", "Funding"),
+        ("funding-user", "Funding User"),
+    )
     company_id = models.ForeignKey(Company, on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateTimeField()
@@ -62,10 +64,10 @@ class Transaction(models.Model):
     )
     status_approved = models.BooleanField()
 
-    def __str__(self):
-        return f'{self.company_id} - {self.price} - {self.date} - {self.status_transaction}'
+    def __str__(self) -> str:
+        return f'{self.date} - {self.company_id}: ${self.price} - {self.get_status_transaction_display()}'
 
     class Meta:
         verbose_name = "Transaction"
         verbose_name_plural = "Transactions"
-        ordering = ["date"]
+        ordering = ["-date"]

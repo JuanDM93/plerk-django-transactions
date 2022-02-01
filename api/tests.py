@@ -55,12 +55,12 @@ class SerializerTest(TestCase):
         )
         serializer = CompanySerializer(company)
         self.assertEqual(serializer.data['name'], 'Test Company')
-        self.assertEqual(serializer.data['status'], 'active')
+        self.assertEqual(serializer.data['status'], 'Active')
 
     def test_transaction_serializer(self):
         now = datetime.now(tz=UTC)
         company = Company.objects.create(
-            name='Test Company',
+            name='test company',
             status='active',
         )
         transaction = Transaction.objects.create(
@@ -71,7 +71,7 @@ class SerializerTest(TestCase):
             status_approved=True,
         )
         serializer = TransactionSerializer(transaction)
-        self.assertEqual(serializer.data['company_id']['id'], company.id)
+        self.assertEqual(serializer.data['company_id']['name'], company.name)
 
 
 class SummaryTest(TestCase):
@@ -79,7 +79,6 @@ class SummaryTest(TestCase):
         return super().setUp()
 
     def test_summary_serializer(self):
-        #now = datetime.now(tz=UTC)
         company = Company.objects.create(
             name='Test Company',
             status='active',
