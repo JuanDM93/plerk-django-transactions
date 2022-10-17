@@ -5,8 +5,8 @@ from rest_framework.response import Response
 from django.db.models import Sum, Count
 from django.db.models.functions import TruncDate
 
-from .models import Transaction, Company
-from .serializers import SummarySerializer, CompanySummarySerializer, CompanySerializer
+from api.models import Transaction, Company
+from api.serializers import SummarySerializer, CompanySummarySerializer, CompanySerializer
 
 
 class SummaryView(APIView):

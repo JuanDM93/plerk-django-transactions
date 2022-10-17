@@ -1,7 +1,6 @@
 import csv
 from django.core.management.base import BaseCommand, CommandError
 
-
 from api.models import Company, Transaction
 
 
