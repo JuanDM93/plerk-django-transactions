@@ -3,12 +3,17 @@ from rest_framework import status
 from rest_framework.response import Response
 
 # Create your tests here.
-from datetime import datetime
 from pytz import UTC
+from datetime import datetime
 from django.contrib.auth import get_user_model
 
 from .models import Company, Transaction
-from .serializers import CompanySerializer, TransactionSerializer, CompanySummarySerializer, SummarySerializer
+from .serializers import (
+    CompanySerializer,
+    TransactionSerializer,
+    CompanySummarySerializer,
+    SummarySerializer
+)
 
 
 User = get_user_model()
@@ -33,15 +38,15 @@ class ModelTests(TestCase):
             status='active',
         )
         transaction = Transaction.objects.create(
-            company_id=company,
+            company=company,
             date=now,
-            price=100,
+            price=10000,
             status_transaction='confirmed',
             status_approved=True,
         )
-        self.assertEqual(transaction.company_id, company)
+        self.assertEqual(transaction.company, company)
         self.assertEqual(transaction.date, now)
-        self.assertEqual(transaction.price, 100)
+        self.assertEqual(transaction.price, 10000)
 
 
 class SerializerTest(TestCase):
@@ -64,14 +69,14 @@ class SerializerTest(TestCase):
             status='active',
         )
         transaction = Transaction.objects.create(
-            company_id=company,
+            company=company,
             date=now,
-            price=100,
+            price=10000,
             status_transaction='confirmed',
             status_approved=True,
         )
         serializer = TransactionSerializer(transaction)
-        self.assertEqual(serializer.data['company_id']['name'], company.name)
+        self.assertEqual(serializer.data['company']['name'], company.name)
 
 
 class SummaryTest(TestCase):
@@ -87,7 +92,7 @@ class SummaryTest(TestCase):
             data={
                 'most_selling_company': CompanySerializer(company).data,
                 'least_selling_company': CompanySerializer(company).data,
-                'total_effective_revenue': 100,
+                'total_effective_revenue': 10000,
                 'total_canceled_revenue': 0,
                 'most_canceled_company': CompanySerializer(company).data
             }
@@ -101,7 +106,7 @@ class SummaryTest(TestCase):
         summary = CompanySummarySerializer(
             data={
                 'name': 'Test Company',
-                'total_effective_revenue': 100,
+                'total_effective_revenue': 10000,
                 'total_canceled_revenue': 0,
                 'most_transaction_date': now
             }

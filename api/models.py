@@ -54,8 +54,8 @@ class Transaction(models.Model):
         ("funding", "Funding"),
         ("funding-user", "Funding User"),
     )
-    company_id = models.ForeignKey(Company, on_delete=models.CASCADE)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    price = models.IntegerField()
     date = models.DateTimeField()
     status_transaction = models.CharField(
         choices=TRANSACTION_STATUS_CHOICES,
@@ -65,7 +65,7 @@ class Transaction(models.Model):
     status_approved = models.BooleanField()
 
     def __str__(self) -> str:
-        return f'{self.date} - {self.company_id}: ${self.price} - {self.get_status_transaction_display()}'
+        return f'{self.date} - {self.company.id}: ${self.price} - {self.get_status_transaction_display()}'
 
     class Meta:
         verbose_name = "Transaction"

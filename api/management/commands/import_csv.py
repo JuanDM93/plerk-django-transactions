@@ -22,6 +22,7 @@ class Command(BaseCommand):
             next(csv_reader)
             t_size = 0
             c_size = 0
+            transactions = []
             for row in csv_reader:
                 try:
                     company_name = row[0].casefold()
@@ -29,15 +30,17 @@ class Command(BaseCommand):
                 except Company.DoesNotExist:
                     company = Company.objects.create(name=company_name)
                     c_size += 1
-
-                Transaction.objects.create(
-                    price=float(row[1]) / 100,
-                    date=row[2],
-                    status_transaction=row[3].casefold(),
-                    status_approved=row[4].casefold() == 'true',
-                    company_id=company,
+                transactions.append(
+                    Transaction(
+                        price=float(row[1]) / 100,
+                        date=row[2],
+                        status_transaction=row[3].casefold(),
+                        status_approved=row[4].casefold() == 'true',
+                        company=company,
+                    )
                 )
                 t_size += 1
+            Transaction.objects.bulk_create(transactions)
         self.stdout.write(
             self.style.SUCCESS(
                 f'Successfully imported {t_size} transactions and {c_size} companies from CSV file')

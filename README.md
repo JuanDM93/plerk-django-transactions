@@ -20,6 +20,8 @@ python manage.py import_csv docs/test_database.csv
 
 ### Service Endpoints
 
+The api has the following endpoints:
+
 ```endpoints
 /admin
 
@@ -27,6 +29,12 @@ python manage.py import_csv docs/test_database.csv
 /api/companies/{company_id}
 
 /openapi
+```
+
+However, in order to access the api endpoints, you need to use basic authentication. You can create a superuser with the following command:
+
+```bash
+python manage.py createsuperuser
 ```
 
 ## Run options

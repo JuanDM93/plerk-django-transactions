@@ -1,4 +1,3 @@
-from numpy import source
 from rest_framework import serializers
 from .models import Transaction, Company
 
@@ -12,16 +11,21 @@ class CompanySerializer(serializers.ModelSerializer):
 
 
 class TransactionSerializer(serializers.ModelSerializer):
-    company_id = CompanySerializer()
+    company = CompanySerializer()
     status_transaction = serializers.CharField(
         source='get_status_transaction_display')
 
     class Meta:
         model = Transaction
         fields = (
-            'date', 'company_id', 'price',
+            'date',
+            'company',
+            'price',
             'status_transaction',
         )
+
+    def get_price(self, obj):
+        return obj.price / 100
 
 
 class SummarySerializer(serializers.Serializer):
