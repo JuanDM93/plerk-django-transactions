@@ -6,7 +6,7 @@ from api.views import SummaryView, CompanyView
 
 urlpatterns = [
     path('summary/', SummaryView.as_view(), name='summary'),
-    path('companies/<int:pk>/', CompanyView.as_view(), name='companies'),
+    path('companies/<uuid:company_uuid4>/', CompanyView.as_view(), name='companies'),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

@@ -1,4 +1,5 @@
 from django.db import models
+from uuid import uuid4
 
 
 class Company(models.Model):
@@ -11,6 +12,7 @@ class Company(models.Model):
         ("active", "Active"),
         ("inactive", "Inactive"),
     )
+    uuid = models.UUIDField(editable=False, unique=True, default=uuid4)
     name = models.CharField(max_length=100)
     status = models.CharField(
         choices=COMPANY_STATUS_CHOICES,
@@ -54,6 +56,7 @@ class Transaction(models.Model):
         ("funding", "Funding"),
         ("funding-user", "Funding User"),
     )
+    uuid = models.UUIDField(editable=False, unique=True, default=uuid4)
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     price = models.IntegerField()
     date = models.DateTimeField()
