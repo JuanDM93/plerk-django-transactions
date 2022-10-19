@@ -7,7 +7,10 @@ from pytz import UTC
 from datetime import datetime
 from django.contrib.auth import get_user_model
 
-from api.models import Company, Transaction
+from api.models import (
+    Company,
+    Transaction,
+)
 from api.serializers import (
     CompanySerializer,
     TransactionSerializer,
