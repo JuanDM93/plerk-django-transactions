@@ -1,5 +1,7 @@
-from django.db import models
 from uuid import uuid4
+from django.db import models
+
+from api.models.managers import CompanyManager
 
 
 class Company(models.Model):
@@ -8,6 +10,9 @@ class Company(models.Model):
     - Nombre
     - Status (activa/inactiva)
     """
+
+    objects = CompanyManager()
+
     COMPANY_STATUS_CHOICES = (
         ("active", "Active"),
         ("inactive", "Inactive"),

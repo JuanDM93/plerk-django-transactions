@@ -2,6 +2,7 @@ from django.db import models
 from uuid import uuid4
 
 from api.models.company import Company
+from api.models.managers import TransactionManager
 
 
 class Transaction(models.Model):
@@ -23,6 +24,9 @@ class Transaction(models.Model):
                 - status_transaction = closed
                 - status_approved = true
     """
+
+    objects = TransactionManager()
+
     TRANSACTION_STATUS_CHOICES = (
         ("closed", "Closed"),
         ("reversed", "Reversed"),

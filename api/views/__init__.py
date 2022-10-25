@@ -1,2 +1,2 @@
-from .summary import SummaryView
-from .company import CompanyView
+from .summary import SummaryGlobalView
+from .company import SummaryCompanyView

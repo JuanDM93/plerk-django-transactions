@@ -9,14 +9,15 @@ from api.models import (
     Transaction,
     Company,
 )
-from api.serializers import CompanySummarySerializer
+from api.serializers import SummaryCompanySerializer
+from api.serializers import CompanySerializer
 
 
-class CompanyView(APIView):
+class SummaryCompanyView(APIView):
 
-    serializer_class = CompanySummarySerializer
+    serializer_class = SummaryCompanySerializer
 
-    def get(self, request, company_uuid4):
+    def get(self, request, company_uuid):
         """
         Return a summary report of transactions for a specific company
             - name
@@ -24,9 +25,13 @@ class CompanyView(APIView):
             - total canceled transactions
             - date with most transactions
         """
-        # company_uuid4 = request.GET.get('uuid4')
-        company = self.get_company(company_uuid4)
-        transactions = Transaction.objects.filter(company_id=company.id,)
+        company = Company.objects.get(uuid=company_uuid)
+        transactions = Transaction.objects.filter(company_id=company.id)
+        if not transactions:
+            return Response(
+                f'No transactions found for company',
+                status=status.HTTP_404_NOT_FOUND
+            )
         effective_transactions = transactions.filter(
             status_transaction='closed',
             status_approved=True,
@@ -42,24 +47,14 @@ class CompanyView(APIView):
             ).order_by('-c_date')[0].get('r_date')
 
             company_summary = {
-                'name': company.name.title(),
+                'company': CompanySerializer(company).data,
                 'total_effective_transactions': effective_transactions.count(),
                 'total_canceled_transactions': canceled_transactions.count(),
                 'most_transactions_date': most_transaction_date,
             }
         except Exception as e:
             return Response(e, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        serializer = CompanySummarySerializer(data=company_summary)
+        serializer = SummaryCompanySerializer(data=company_summary)
         if serializer.is_valid():
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def get_company(self, company_uuid):
-        try:
-            company = Company.objects.get(uuid=company_uuid)
-        except Company.DoesNotExist:
-            return Response(
-                f'Company does not exist',
-                status=status.HTTP_404_NOT_FOUND
-            )
-        return company

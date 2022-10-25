@@ -14,12 +14,9 @@ from api.serializers import (
 )
 
 
-class SummaryView(APIView):
+class SummaryGlobalView(APIView):
 
     serializer_class = SummarySerializer
-
-    def get_transactions(self):
-        return Transaction.objects.all().select_related('company')
 
     def get(self, request):
         """
@@ -30,7 +27,7 @@ class SummaryView(APIView):
             - total canceled revenue
             - most canceled company
         """
-        transactions = self.get_transactions()
+        transactions = Transaction.objects.all().select_related('company')
         confirmed_transactions = transactions.filter(
             status_transaction='closed',
             status_approved=True

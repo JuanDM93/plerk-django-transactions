@@ -2,21 +2,21 @@ from django.urls import path
 from rest_framework.urlpatterns import format_suffix_patterns
 
 from api.views import (
-    CompanyView,
-    SummaryView,
+    SummaryCompanyView,
+    SummaryGlobalView,
 )
 
 
 urlpatterns = [
     path(
-        'summary/',
-        SummaryView.as_view(),
-        name='summary'
+        'summary/<uuid:company_uuid>',
+        SummaryCompanyView.as_view(),
+        name='summary_company'
     ),
     path(
-        'companies/<uuid:company_uuid4>/',
-        CompanyView.as_view(),
-        name='companies'
+        'summary',
+        SummaryGlobalView.as_view(),
+        name='summary_global'
     ),
 ]
 
