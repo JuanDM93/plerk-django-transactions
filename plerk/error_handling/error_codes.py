@@ -31,6 +31,11 @@ class ErrorCodes(Enum):
         'message': 'Transaction already exists',
         'status_code': status.HTTP_400_BAD_REQUEST,
     }
+    NO_TRANSACTIONS_FOUND = {
+        'error_code': 2003,
+        'message': 'No transactions found',
+        'status_code': status.HTTP_404_NOT_FOUND,
+    }
     # Summary
     SUMMARY_NOT_FOUND = {
         'error_code': 3001,

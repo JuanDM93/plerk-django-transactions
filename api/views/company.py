@@ -9,8 +9,14 @@ from api.models import (
     Transaction,
     Company,
 )
-from api.serializers import SummaryCompanySerializer
-from api.serializers import CompanySerializer
+from api.serializers import (
+    SummaryCompanySerializer,
+    CompanySerializer,
+)
+from plerk.error_handling import (
+    CustomError,
+    ErrorCodes,
+)
 
 
 class SummaryCompanyView(APIView):
@@ -28,10 +34,7 @@ class SummaryCompanyView(APIView):
         company = Company.objects.get(uuid=company_uuid)
         transactions = Transaction.objects.filter(company_id=company.id)
         if not transactions:
-            return Response(
-                f'No transactions found for company',
-                status=status.HTTP_404_NOT_FOUND
-            )
+            raise CustomError(**ErrorCodes.NO_TRANSACTIONS_FOUND.value)
         effective_transactions = transactions.filter(
             status_transaction='closed',
             status_approved=True,
@@ -40,21 +43,17 @@ class SummaryCompanyView(APIView):
             status_transaction='closed',
             status_approved=True,
         )
-        try:
-            most_transaction_date = transactions.values('date').annotate(
-                r_date=TruncDate('date')).values('r_date').annotate(
-                c_date=Count('r_date')
-            ).order_by('-c_date')[0].get('r_date')
+        most_transaction_date = transactions.values('date').annotate(
+            r_date=TruncDate('date')).values('r_date').annotate(
+            c_date=Count('r_date')
+        ).order_by('-c_date')[0].get('r_date')
 
-            company_summary = {
-                'company': CompanySerializer(company).data,
-                'total_effective_transactions': effective_transactions.count(),
-                'total_canceled_transactions': canceled_transactions.count(),
-                'most_transactions_date': most_transaction_date,
-            }
-        except Exception as e:
-            return Response(e, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        company_summary = {
+            'company': CompanySerializer(company).data,
+            'total_effective_transactions': effective_transactions.count(),
+            'total_canceled_transactions': canceled_transactions.count(),
+            'most_transactions_date': most_transaction_date,
+        }
         serializer = SummaryCompanySerializer(data=company_summary)
-        if serializer.is_valid():
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid()
+        return Response(serializer.data, status=status.HTTP_200_OK)
