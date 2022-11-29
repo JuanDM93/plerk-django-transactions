@@ -25,7 +25,11 @@ The api has the following endpoints:
 ```endpoints
 /admin
 
-/api/summary
+/api/summaries
+/api/summaries/{company_id}
+
+CRUD
+/api/companies
 /api/companies/{company_id}
 
 /openapi

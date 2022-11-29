@@ -43,7 +43,7 @@ class ModelTests(TestCase):
             company=company,
             date=now,
             price=10000,
-            status_transaction='confirmed',
+            status_transaction='funding',
             status_approved=True,
         )
         self.assertEqual(transaction.company, company)
@@ -74,7 +74,7 @@ class SerializerTest(TestCase):
             company=company,
             date=now,
             price=10000,
-            status_transaction='confirmed',
+            status_transaction='funding',
             status_approved=True,
         )
         serializer = TransactionSerializer(transaction)

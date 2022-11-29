@@ -28,6 +28,9 @@ class Company(models.Model):
     def __str__(self):
         return f"{self.name.title()} - {self.get_status_display()}"
 
+    def get_status_display(self):
+        return dict(self.COMPANY_STATUS_CHOICES)[self.status]
+
     class Meta:
         verbose_name = "Company"
         verbose_name_plural = "Companies"

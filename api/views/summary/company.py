@@ -55,5 +55,5 @@ class SummaryCompanyView(APIView):
             'most_transactions_date': most_transaction_date,
         }
         serializer = SummaryCompanySerializer(data=company_summary)
-        serializer.is_valid()
+        serializer.is_valid(raise_exception=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

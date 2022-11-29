@@ -49,6 +49,9 @@ class Transaction(models.Model):
     def __str__(self) -> str:
         return f'{self.date} - {self.company.id}: ${self.price} - {self.get_status_transaction_display()}'
 
+    def get_status_transaction_display(self):
+        return dict(self.TRANSACTION_STATUS_CHOICES)[self.status_transaction]
+
     class Meta:
         verbose_name = "Transaction"
         verbose_name_plural = "Transactions"

@@ -7,11 +7,15 @@ from api.models import (
 
 
 class CompanySerializer(serializers.ModelSerializer):
-    status = serializers.CharField(source='get_status_display')
+    status = serializers.CharField(
+        source='get_status_display',
+        required=False,
+    )
 
     class Meta:
         model = Company
         fields = (
+            'uuid',
             'name',
             'status',
         )
@@ -26,6 +30,7 @@ class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
         fields = (
+            'uuid',
             'date',
             'company',
             'price',
