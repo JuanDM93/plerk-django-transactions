@@ -66,5 +66,5 @@ class SummaryGlobalView(APIView):
                 'most_canceled_company': CompanySerializer(most_canceled_company).data,
             }
         )
-        summary.is_valid()
+        summary.is_valid(raise_exception=True)
         return Response(summary.data, status=status.HTTP_200_OK)

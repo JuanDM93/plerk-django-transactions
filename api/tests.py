@@ -78,7 +78,7 @@ class SerializerTest(TestCase):
             status_approved=True,
         )
         serializer = TransactionSerializer(transaction)
-        self.assertEqual(serializer.data['company']['name'], company.name)
+        self.assertEqual(serializer.data['company'], company.uuid)
 
 
 class SummaryTest(TestCase):
@@ -99,12 +99,11 @@ class SummaryTest(TestCase):
                 'most_canceled_company': CompanySerializer(company).data
             }
         )
-        if summary.is_valid():
-            return Response(summary.data, status=status.HTTP_200_OK)
-        return Response(summary.errors, status=status.HTTP_400_BAD_REQUEST)
+        summary.is_valid(raise_exception=True)
+        return Response(summary.data, status=status.HTTP_200_OK)
 
     def test_company_summary_serializer(self):
-        now = localtime()
+        now = localtime().date()
         summary = SummaryCompanySerializer(
             data={
                 'company': CompanySerializer(
@@ -118,6 +117,5 @@ class SummaryTest(TestCase):
                 'most_transactions_date': now,
             }
         )
-        if summary.is_valid():
-            return Response(summary.data, status=status.HTTP_200_OK)
-        return Response(summary.errors, status=status.HTTP_400_BAD_REQUEST)
+        summary.is_valid(raise_exception=True)
+        return Response(summary.data, status=status.HTTP_200_OK)

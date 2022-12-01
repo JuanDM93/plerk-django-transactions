@@ -44,7 +44,7 @@ class Transaction(models.Model):
         default='pending',
         max_length=12
     )
-    status_approved = models.BooleanField()
+    status_approved = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         return f'{self.date} - {self.company.id}: ${self.price} - {self.get_status_transaction_display()}'

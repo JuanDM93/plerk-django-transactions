@@ -22,9 +22,13 @@ class CompanySerializer(serializers.ModelSerializer):
 
 
 class TransactionSerializer(serializers.ModelSerializer):
-    company = CompanySerializer()
+    company = serializers.SlugRelatedField(
+        slug_field='uuid',
+        queryset=Company.objects.all(),
+    )
     status_transaction = serializers.CharField(
-        source='get_status_transaction_display'
+        source='get_status_transaction_display',
+        required=False,
     )
 
     class Meta:
@@ -35,6 +39,7 @@ class TransactionSerializer(serializers.ModelSerializer):
             'company',
             'price',
             'status_transaction',
+            'status_approved',
         )
 
     def get_price(self, obj):

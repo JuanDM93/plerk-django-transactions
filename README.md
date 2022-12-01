@@ -32,6 +32,9 @@ CRUD
 /api/companies
 /api/companies/{company_id}
 
+/api/transactions
+/api/transactions/{transaction_id}
+
 /openapi
 ```
 
