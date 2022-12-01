@@ -1,23 +1,8 @@
-from django.urls import path
-from rest_framework.urlpatterns import format_suffix_patterns
-
-from api.views import (
-    CompanyView,
-    SummaryView,
-)
+from django.urls import path, include
 
 
 urlpatterns = [
-    path(
-        'summary/',
-        SummaryView.as_view(),
-        name='summary'
-    ),
-    path(
-        'companies/<uuid:company_uuid4>/',
-        CompanyView.as_view(),
-        name='companies'
-    ),
+    path('summaries/', include('api.views.summary.urls')),
+    path('companies/', include('api.views.company.urls')),
+    path('transactions/', include('api.views.transaction.urls')),
 ]
-
-urlpatterns = format_suffix_patterns(urlpatterns)

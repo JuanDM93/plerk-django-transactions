@@ -3,8 +3,7 @@ from rest_framework import status
 from rest_framework.response import Response
 
 # Create your tests here.
-from pytz import UTC
-from datetime import datetime
+from django.utils.timezone import localtime
 from django.contrib.auth import get_user_model
 
 from api.models import (
@@ -14,7 +13,7 @@ from api.models import (
 from api.serializers import (
     CompanySerializer,
     TransactionSerializer,
-    CompanySummarySerializer,
+    SummaryCompanySerializer,
     SummarySerializer
 )
 
@@ -35,7 +34,7 @@ class ModelTests(TestCase):
         self.assertEqual(company.status, 'active')
 
     def test_transaction_creation(self):
-        now = datetime.now(tz=UTC)
+        now = localtime()
         company = Company.objects.create(
             name='Test Company',
             status='active',
@@ -44,7 +43,7 @@ class ModelTests(TestCase):
             company=company,
             date=now,
             price=10000,
-            status_transaction='confirmed',
+            status_transaction='funding',
             status_approved=True,
         )
         self.assertEqual(transaction.company, company)
@@ -66,7 +65,7 @@ class SerializerTest(TestCase):
         self.assertEqual(serializer.data['status'], 'Active')
 
     def test_transaction_serializer(self):
-        now = datetime.now(tz=UTC)
+        now = localtime()
         company = Company.objects.create(
             name='test company',
             status='active',
@@ -75,11 +74,11 @@ class SerializerTest(TestCase):
             company=company,
             date=now,
             price=10000,
-            status_transaction='confirmed',
+            status_transaction='funding',
             status_approved=True,
         )
         serializer = TransactionSerializer(transaction)
-        self.assertEqual(serializer.data['company']['name'], company.name)
+        self.assertEqual(serializer.data['company'], company.uuid)
 
 
 class SummaryTest(TestCase):
@@ -100,20 +99,23 @@ class SummaryTest(TestCase):
                 'most_canceled_company': CompanySerializer(company).data
             }
         )
-        if summary.is_valid():
-            return Response(summary.data, status=status.HTTP_200_OK)
-        return Response(summary.errors, status=status.HTTP_400_BAD_REQUEST)
+        summary.is_valid(raise_exception=True)
+        return Response(summary.data, status=status.HTTP_200_OK)
 
     def test_company_summary_serializer(self):
-        now = datetime.now(tz=UTC)
-        summary = CompanySummarySerializer(
+        now = localtime().date()
+        summary = SummaryCompanySerializer(
             data={
-                'name': 'Test Company',
-                'total_effective_revenue': 10000,
-                'total_canceled_revenue': 0,
-                'most_transaction_date': now
+                'company': CompanySerializer(
+                    Company.objects.create(
+                        name='Test Company',
+                        status='active',
+                    )
+                ).data,
+                'total_effective_transactions': 1,
+                'total_canceled_transactions': 0,
+                'most_transactions_date': now,
             }
         )
-        if summary.is_valid():
-            return Response(summary.data, status=status.HTTP_200_OK)
-        return Response(summary.errors, status=status.HTTP_400_BAD_REQUEST)
+        summary.is_valid(raise_exception=True)
+        return Response(summary.data, status=status.HTTP_200_OK)

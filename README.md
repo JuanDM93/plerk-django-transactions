@@ -25,10 +25,19 @@ The api has the following endpoints:
 ```endpoints
 /admin
 
-/api/summary
+/api/summaries
+/api/summaries/{company_id}
+
+CRUD
+/api/companies
 /api/companies/{company_id}
 
-/openapi
+/api/transactions
+/api/transactions/{transaction_id}
+
+/docs
+/.../swagger
+/.../redoc
 ```
 
 However, in order to access the api endpoints, you need to use basic authentication. You can create a superuser with the following command:

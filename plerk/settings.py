@@ -41,8 +41,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     'rest_framework',
-    
+    'drf_yasg',
+
     'api',
 ]
 
@@ -124,6 +126,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    'EXCEPTION_HANDLER': 'plerk.error_handling.exception_handler.custom_exception_handler',
 }
 
 # Static files (CSS, JavaScript, Images)

@@ -1,5 +1,7 @@
-from django.db import models
 from uuid import uuid4
+from django.db import models
+
+from api.models.managers import CompanyManager
 
 
 class Company(models.Model):
@@ -8,6 +10,9 @@ class Company(models.Model):
     - Nombre
     - Status (activa/inactiva)
     """
+
+    objects = CompanyManager()
+
     COMPANY_STATUS_CHOICES = (
         ("active", "Active"),
         ("inactive", "Inactive"),
@@ -22,6 +27,9 @@ class Company(models.Model):
 
     def __str__(self):
         return f"{self.name.title()} - {self.get_status_display()}"
+
+    def get_status_display(self):
+        return dict(self.COMPANY_STATUS_CHOICES)[self.status]
 
     class Meta:
         verbose_name = "Company"

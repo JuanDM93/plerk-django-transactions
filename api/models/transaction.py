@@ -2,6 +2,7 @@ from django.db import models
 from uuid import uuid4
 
 from api.models.company import Company
+from api.models.managers import TransactionManager
 
 
 class Transaction(models.Model):
@@ -23,6 +24,9 @@ class Transaction(models.Model):
                 - status_transaction = closed
                 - status_approved = true
     """
+
+    objects = TransactionManager()
+
     TRANSACTION_STATUS_CHOICES = (
         ("closed", "Closed"),
         ("reversed", "Reversed"),
@@ -40,10 +44,13 @@ class Transaction(models.Model):
         default='pending',
         max_length=12
     )
-    status_approved = models.BooleanField()
+    status_approved = models.BooleanField(default=False)
 
     def __str__(self) -> str:
         return f'{self.date} - {self.company.id}: ${self.price} - {self.get_status_transaction_display()}'
+
+    def get_status_transaction_display(self):
+        return dict(self.TRANSACTION_STATUS_CHOICES)[self.status_transaction]
 
     class Meta:
         verbose_name = "Transaction"
