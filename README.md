@@ -35,7 +35,9 @@ CRUD
 /api/transactions
 /api/transactions/{transaction_id}
 
-/openapi
+/docs
+/.../swagger
+/.../redoc
 ```
 
 However, in order to access the api endpoints, you need to use basic authentication. You can create a superuser with the following command:
